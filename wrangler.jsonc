@@ -13,7 +13,7 @@
     {
       "binding": "DB",
       "database_name": "goldengames-nexus-db",
-      "database_id": "00000000-0000-4000-8000-000000000000",
+      "database_id": "a5c99ce1-393b-400d-9478-85dff757c9f4",
       "migrations_dir": "drizzle"
     }
   ],
