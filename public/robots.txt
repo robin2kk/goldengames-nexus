@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+
+Sitemap: https://goldengames-nexus.robinsonpaulino51.chatgpt.site/sitemap.xml

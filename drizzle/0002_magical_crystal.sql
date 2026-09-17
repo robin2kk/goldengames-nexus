@@ -1,0 +1,1 @@
+ALTER TABLE `posts` ADD `youtube_id` text;

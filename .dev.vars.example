@@ -1,0 +1,7 @@
+ENVIRONMENT=development
+DEV_ADMIN_EMAIL=owner@example.com
+
+# Production values are configured in Cloudflare, not committed here:
+# ADMIN_EMAILS=owner@example.com
+# CF_ACCESS_TEAM_DOMAIN=your-team.cloudflareaccess.com
+# CF_ACCESS_AUD=your-access-application-audience
