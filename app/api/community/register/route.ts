@@ -13,6 +13,9 @@ export async function POST(request: Request) {
   const email = input.email?.trim().toLowerCase() ?? "";
   const password = input.password ?? "";
   if (!/^[a-zA-Z0-9_]{3,24}$/.test(username)) return Response.json({ error: "Username must be 3–24 characters using letters, numbers or underscores" }, { status: 400 });
+  if (["admin", "administrator", "goldengames", "goldengamesofficial", "moderator", "official"].includes(username.toLowerCase())) {
+    return Response.json({ error: "That username is reserved" }, { status: 409 });
+  }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) return Response.json({ error: "Enter a valid email address" }, { status: 400 });
   if (password.length < 10 || password.length > 128) return Response.json({ error: "Password must contain at least 10 characters" }, { status: 400 });
   const id = crypto.randomUUID();
