@@ -1,11 +1,14 @@
 import { env } from "cloudflare:workers";
-import { assertCommunityOrigin, createCommunitySession, hashPassword, sessionCookie } from "../../../community-auth";
+import { assertCommunityOrigin, createCommunitySession, hashPassword, sessionCookie, verifyTurnstile } from "../../../community-auth";
 
 export async function POST(request: Request) {
   const originError = assertCommunityOrigin(request);
   if (originError) return originError;
   if (!env.DB) return Response.json({ error: "Community database unavailable" }, { status: 503 });
-  const input = await request.json().catch(() => ({})) as { username?: string; email?: string; password?: string };
+  const input = await request.json().catch(() => ({})) as { username?: string; email?: string; password?: string; turnstileToken?: string };
+  if (!(await verifyTurnstile(request, input.turnstileToken ?? "", "community_register"))) {
+    return Response.json({ error: "Verification expired or failed. Please try again." }, { status: 400 });
+  }
   const username = input.username?.trim() ?? "";
   const email = input.email?.trim().toLowerCase() ?? "";
   const password = input.password ?? "";

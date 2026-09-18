@@ -3,20 +3,22 @@
 import { useState } from "react";
 import { LogIn, LogOut, MessageSquarePlus, Send, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { resetTurnstile, Turnstile } from "../turnstile";
 
-export function AuthForm({ mode }: { mode: "login" | "register" }) {
+export function AuthForm({ mode, turnstileSiteKey }: { mode: "login" | "register"; turnstileSiteKey?: string }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault(); setBusy(true); setError("");
     const form = new FormData(event.currentTarget);
     const body = mode === "register"
-      ? { username: form.get("username"), email: form.get("email"), password: form.get("password") }
-      : { identity: form.get("identity"), password: form.get("password") };
+      ? { username: form.get("username"), email: form.get("email"), password: form.get("password"), turnstileToken }
+      : { identity: form.get("identity"), password: form.get("password"), turnstileToken };
     const response = await fetch(`/api/community/${mode}`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
     const data = await response.json().catch(() => ({})) as { error?: string };
-    if (!response.ok) { setError(data.error || "The request could not be completed"); setBusy(false); return; }
+    if (!response.ok) { setError(data.error || "The request could not be completed"); setBusy(false); setTurnstileToken(""); resetTurnstile(); return; }
     router.push("/community");
     router.refresh();
   }
@@ -24,7 +26,8 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     {mode === "register" && <><label>Username<input name="username" required minLength={3} maxLength={24} autoComplete="username" placeholder="GoldenPlayer"/></label><label>Email<input name="email" type="email" required autoComplete="email" placeholder="you@example.com"/></label></>}
     {mode === "login" && <label>Username or email<input name="identity" required autoComplete="username"/></label>}
     <label>Password<input name="password" type="password" required minLength={10} maxLength={128} autoComplete={mode === "login" ? "current-password" : "new-password"}/></label>
-    <button className="primary-btn" disabled={busy}>{mode === "login" ? <LogIn size={17}/> : <UserPlus size={17}/>} {busy ? "Please wait..." : mode === "login" ? "Sign in" : "Create account"}</button>
+    <Turnstile siteKey={turnstileSiteKey} action={mode === "login" ? "community_login" : "community_register"} onToken={setTurnstileToken}/>
+    <button className="primary-btn" disabled={busy || (Boolean(turnstileSiteKey) && !turnstileToken)}>{mode === "login" ? <LogIn size={17}/> : <UserPlus size={17}/>} {busy ? "Please wait..." : mode === "login" ? "Sign in" : "Create account"}</button>
     {error && <p className="community-error">{error}</p>}
   </form>;
 }
