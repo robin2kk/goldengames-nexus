@@ -53,6 +53,27 @@ export function ModerationQueue({
     location.reload();
   }
 
+  async function deletePublishedPost(post: PublishedPost) {
+    const confirmed = window.confirm(
+      `Delete “${post.title}”? This will also permanently delete every reply in the conversation.`,
+    );
+    if (!confirmed) return;
+
+    const key = `published-${post.id}-delete`;
+    setBusy(key);
+    setMessage("");
+    const response = await fetch(`/api/admin/community/posts/${post.id}`, {
+      method: "DELETE",
+      headers: { "x-goldengames-admin": "v1" },
+    });
+    setBusy("");
+    if (!response.ok) {
+      setMessage("The published conversation could not be deleted.");
+      return;
+    }
+    location.reload();
+  }
+
   return <section className="moderation-queue">
     <div className="moderation-heading">
       <span className="eyebrow">COMMUNITY MODERATION</span>
@@ -93,10 +114,17 @@ export function ModerationQueue({
       </div>
       <h2>{post.title}</h2>
       <div className="moderation-actions">
-        <button className="official-reply-btn" onClick={() => setReplyingTo(replyingTo === post.id ? null : post.id)}>
+        <button disabled={Boolean(busy)} className="official-reply-btn" onClick={() => setReplyingTo(replyingTo === post.id ? null : post.id)}>
           <MessageCircleReply size={16}/> Reply
         </button>
         <a className="view-thread-link" href={`/community/${post.id}`} target="_blank" rel="noreferrer">View conversation</a>
+        <button
+          className="danger-btn"
+          disabled={Boolean(busy)}
+          onClick={() => deletePublishedPost(post)}
+        >
+          {busy === `published-${post.id}-delete` ? <Loader2 className="spin" size={16}/> : <Trash2 size={16}/>} Delete conversation
+        </button>
       </div>
       {replyingTo === post.id && <AdminReplyForm postId={post.id} onCancel={() => setReplyingTo(null)}/>}
     </article>) : <div className="community-empty"><MessageCircleReply size={30}/><h3>No published conversations</h3><p>Approve a community post before sending an official reply.</p></div>}
