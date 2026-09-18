@@ -1,0 +1,11 @@
+import { env } from "cloudflare:workers";
+import { MessageCircle, MessageSquarePlus } from "lucide-react";
+import { getCommunityUser } from "../community-auth";
+import { CommunityHeader } from "./community-header";
+import { SiteFooter } from "../site-footer";
+export const dynamic="force-dynamic";
+type CommunityPost={id:number;title:string;body:string;platform:string;kind:string;createdAt:string;username:string;replyCount:number};
+export default async function Community(){const user=await getCommunityUser();let posts:CommunityPost[]=[];try{if(env.DB){const result=await env.DB.prepare(`SELECT p.id,p.title,p.body,p.platform,p.kind,p.created_at AS createdAt,u.username,
+  (SELECT COUNT(*) FROM community_comments c WHERE c.post_id=p.id AND c.status='approved') AS replyCount
+  FROM community_posts p JOIN community_users u ON u.id=p.user_id WHERE p.status='approved' ORDER BY p.created_at DESC LIMIT 50`).all<CommunityPost>();posts=result.results}}catch{}
+return <main className="community-page"><CommunityHeader user={user}/><section className="community-hero"><div><span className="eyebrow"><MessageCircle size={15}/> GOLDENGAMES COMMUNITY</span><h1>Ask. Share.<br/>Help the scene.</h1><p>A moderated space for gaming-scene questions and respectful technical discussion.</p></div>{user?<a className="primary-btn" href="/community/new"><MessageSquarePlus size={18}/> Create post</a>:<a className="primary-btn" href="/community/register">Create an account</a>}</section><section className="community-list"><div className="community-list-heading"><div><span className="eyebrow">APPROVED CONVERSATIONS</span><h2>Latest community posts</h2></div></div>{posts.length?posts.map(post=><a className="community-card" href={`/community/${post.id}`} key={post.id}><span>{post.platform}</span><div><small>{post.kind} • @{post.username} • {new Date(post.createdAt).toLocaleDateString()}</small><h3>{post.title}</h3><p>{post.body.slice(0,180)}{post.body.length>180?"…":""}</p></div><b>{post.replyCount} {post.replyCount===1?"reply":"replies"}</b></a>):<div className="community-empty"><MessageCircle size={30}/><h3>No approved posts yet</h3><p>Create the first question. It will appear here after review.</p></div>}</section><SiteFooter/></main>}

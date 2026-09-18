@@ -8,6 +8,7 @@ export function SiteFooter() {
       <nav className="footer-links" aria-label="Website information">
         <a href="/about">About</a>
         <a href="/editorial-policy">Editorial Policy</a>
+        <a href="/community">Community</a>
         <a href="/privacy">Privacy</a>
         <a href="/terms">Terms</a>
       </nav>

@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import { ArrowUpRight, Download, Play, Sparkles, Zap } from "lucide-react";
+import { ArrowUpRight, Download, MessageCircle, Play, Sparkles, Zap } from "lucide-react";
 import { HomeFeed, type FeedPost } from "./home-feed";
 import { HeaderSearch } from "./header-search";
 import { AdSlot } from "./ad-slot";
@@ -37,7 +37,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
   return <main className="min-h-screen">
     <header className="site-header">
       <a className="brand" href="/" aria-label="GoldenGames Nexus home"><span className="brand-mark"><img src="/goldengames-logo.png" alt=""/></span><span><b>GOLDENGAMES</b><em>NEXUS v1.0</em></span></a>
-      <nav aria-label="Primary navigation"><a href="#latest">News</a><a href="#videos">Videos</a><a href="#downloads">Downloads</a><a href="#platforms">Platforms</a></nav>
+      <nav aria-label="Primary navigation"><a href="#latest">News</a><a href="#videos">Videos</a><a href="#downloads">Downloads</a><a href="#platforms">Platforms</a><a className="community-nav" href="/community"><MessageCircle size={15}/> Community</a></nav>
       <HeaderSearch initialQuery={q}/>
     </header>
     <section className="ticker" aria-label="Breaking updates"><Zap size={14}/><b>LIVE FEED</b><span>PS5 • PS4 • XBOX • SWITCH • RETRO</span><span className="ticker-rule"/></section>

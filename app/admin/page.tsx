@@ -20,4 +20,4 @@ export default async function AdminPage() {
   ).all<AdminPost>();
   return <AdminShell email={user.email}><Publisher posts={result.results}/></AdminShell>;
 }
-function AdminShell({children,email}:{children:React.ReactNode;email?:string}){return <main className="admin-page"><header className="admin-header"><a className="brand" href="/"><span className="brand-mark"><img src="/goldengames-logo.png" alt=""/></span><span><b>GOLDENGAMES</b><em>NEXUS v1.0</em></span></a><div><span><ShieldCheck size={15}/>{email||"Protected by Cloudflare Access"}</span><a href="/">View website</a></div></header>{children}</main>}
+function AdminShell({children,email}:{children:React.ReactNode;email?:string}){return <main className="admin-page"><header className="admin-header"><a className="brand" href="/"><span className="brand-mark"><img src="/goldengames-logo.png" alt=""/></span><span><b>GOLDENGAMES</b><em>NEXUS v1.0</em></span></a><div><span><ShieldCheck size={15}/>{email||"Protected by Cloudflare Access"}</span>{email&&<a href="/admin/community">Moderate community</a>}<a href="/">View website</a></div></header>{children}</main>}
