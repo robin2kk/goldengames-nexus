@@ -1,4 +1,5 @@
 import { env } from "cloudflare:workers";
+import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
 import { cookies, headers } from "next/headers";
 
 export type AdminUser = {
@@ -7,20 +8,9 @@ export type AdminUser = {
   displayName: string;
 };
 
-type AccessPayload = {
-  aud?: string | string[];
-  email?: string;
-  exp?: number;
-  iss?: string;
-  nbf?: number;
-  sub?: string;
-};
+type AccessPayload = JWTPayload & { email?: string };
 
-type AccessHeader = { alg?: string; kid?: string };
-type AccessJwk = JsonWebKey & { kid?: string };
-type AccessCerts = { keys?: AccessJwk[] };
-
-let cachedCerts: { domain: string; expiresAt: number; keys: AccessJwk[] } | null = null;
+const accessKeySets = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
 
 export async function getAdminUser(requestHeaders?: Headers): Promise<AdminUser | null> {
   const runtimeEnv = env as Cloudflare.Env;
@@ -45,7 +35,15 @@ export async function getAdminUser(requestHeaders?: Headers): Promise<AdminUser 
 
   if (!token || !teamDomain || !audience) return null;
 
-  const payload = await verifyAccessToken(token, teamDomain, audience).catch(() => null);
+  const payload = await verifyAccessToken(token, teamDomain, audience).catch((error) => {
+    // Keep authentication failures useful in Worker logs without exposing the
+    // JWT, email address, or other identity data to the public response.
+    console.warn(
+      "Cloudflare Access JWT validation failed",
+      error instanceof Error ? error.code ?? error.name : "unknown_error",
+    );
+    return null;
+  });
   if (!payload) return null;
 
   const tokenEmail = payload.email?.trim().toLowerCase();
@@ -89,51 +87,19 @@ async function verifyAccessToken(
   teamDomain: string,
   audience: string,
 ): Promise<AccessPayload | null> {
-  const parts = token.split(".");
-  if (parts.length !== 3) return null;
-
-  const jwtHeader = decodeJson<AccessHeader>(parts[0]);
-  const payload = decodeJson<AccessPayload>(parts[1]);
-  if (!jwtHeader || !payload || jwtHeader.alg !== "RS256" || !jwtHeader.kid) return null;
-
-  const now = Math.floor(Date.now() / 1000);
-  if (!payload.exp || payload.exp <= now || (payload.nbf && payload.nbf > now + 30)) return null;
-  if (normalizeIssuer(payload.iss) !== normalizeIssuer(teamDomain)) return null;
-  const audiences = Array.isArray(payload.aud) ? payload.aud : [payload.aud];
-  if (!audiences.includes(audience)) return null;
-
-  const keys = await getAccessCerts(teamDomain);
-  const jwk = keys.find((key) => key.kid === jwtHeader.kid);
-  if (!jwk) return null;
-
-  const publicKey = await crypto.subtle.importKey(
-    "jwk",
-    jwk,
-    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-    false,
-    ["verify"],
-  );
-  const valid = await crypto.subtle.verify(
-    "RSASSA-PKCS1-v1_5",
-    publicKey,
-    decodeBase64Url(parts[2]),
-    new TextEncoder().encode(`${parts[0]}.${parts[1]}`),
-  );
-  return valid ? payload : null;
-}
-
-async function getAccessCerts(teamDomain: string): Promise<AccessJwk[]> {
-  if (cachedCerts && cachedCerts.domain === teamDomain && cachedCerts.expiresAt > Date.now()) {
-    return cachedCerts.keys;
+  let keySet = accessKeySets.get(teamDomain);
+  if (!keySet) {
+    keySet = createRemoteJWKSet(new URL(`${teamDomain}/cdn-cgi/access/certs`));
+    accessKeySets.set(teamDomain, keySet);
   }
-  const response = await fetch(`${teamDomain}/cdn-cgi/access/certs`, {
-    headers: { accept: "application/json" },
+
+  const { payload } = await jwtVerify(token, keySet, {
+    algorithms: ["RS256"],
+    issuer: teamDomain,
+    audience,
+    clockTolerance: 30,
   });
-  if (!response.ok) throw new Error("Cloudflare Access certificates are unavailable");
-  const body = (await response.json()) as AccessCerts;
-  const keys = body.keys ?? [];
-  cachedCerts = { domain: teamDomain, expiresAt: Date.now() + 10 * 60 * 1000, keys };
-  return keys;
+  return payload as AccessPayload;
 }
 
 function parseAdminEmails(value?: string): Set<string> {
@@ -163,23 +129,4 @@ function normalizeTeamDomain(value?: string): string | null {
   } catch {
     return null;
   }
-}
-
-function normalizeIssuer(value?: string): string {
-  return (value ?? "").replace(/\/$/, "");
-}
-
-function decodeJson<T>(value: string): T | null {
-  try {
-    return JSON.parse(new TextDecoder().decode(decodeBase64Url(value))) as T;
-  } catch {
-    return null;
-  }
-}
-
-function decodeBase64Url(value: string): Uint8Array<ArrayBuffer> {
-  const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
-  const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
-  const decoded = atob(padded);
-  return Uint8Array.from(decoded, (character) => character.charCodeAt(0));
 }
