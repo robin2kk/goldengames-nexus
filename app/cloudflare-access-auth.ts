@@ -8,11 +8,29 @@ export type AdminUser = {
   displayName: string;
 };
 
+export type AdminAuthReason =
+  | "authorized"
+  | "development"
+  | "missing-config"
+  | "missing-token"
+  | "invalid-token"
+  | "missing-email"
+  | "email-not-allowed";
+
+export type AdminAuthResult = {
+  user: AdminUser | null;
+  reason: AdminAuthReason;
+};
+
 type AccessPayload = JWTPayload & { email?: string };
 
 const accessKeySets = new Map<string, ReturnType<typeof createRemoteJWKSet>>();
 
 export async function getAdminUser(requestHeaders?: Headers): Promise<AdminUser | null> {
+  return (await getAdminAuthResult(requestHeaders)).user;
+}
+
+export async function getAdminAuthResult(requestHeaders?: Headers): Promise<AdminAuthResult> {
   const runtimeEnv = env as Cloudflare.Env;
   const requestHeaderList = requestHeaders ?? (await headers());
 
@@ -21,7 +39,10 @@ export async function getAdminUser(requestHeaders?: Headers): Promise<AdminUser 
 
   if (environment === "development" && developmentEmail) {
     const email = developmentEmail.trim().toLowerCase();
-    return { userId: `local:${email}`, email, displayName: email };
+    return {
+      user: { userId: `local:${email}`, email, displayName: email },
+      reason: "development",
+    };
   }
 
   const token =
@@ -33,7 +54,8 @@ export async function getAdminUser(requestHeaders?: Headers): Promise<AdminUser 
   const teamDomain = normalizeTeamDomain(getTextBinding(runtimeEnv, "CF_ACCESS_TEAM_DOMAIN"));
   const audience = getTextBinding(runtimeEnv, "CF_ACCESS_AUD")?.trim();
 
-  if (!token || !teamDomain || !audience) return null;
+  if (!teamDomain || !audience) return { user: null, reason: "missing-config" };
+  if (!token) return { user: null, reason: "missing-token" };
 
   const payload = await verifyAccessToken(token, teamDomain, audience).catch((error) => {
     // Keep authentication failures useful in Worker logs without exposing the
@@ -44,18 +66,21 @@ export async function getAdminUser(requestHeaders?: Headers): Promise<AdminUser 
     );
     return null;
   });
-  if (!payload) return null;
+  if (!payload) return { user: null, reason: "invalid-token" };
 
   const tokenEmail = payload.email?.trim().toLowerCase();
-  if (!tokenEmail) return null;
+  if (!tokenEmail) return { user: null, reason: "missing-email" };
 
   const allowlist = parseAdminEmails(getTextBinding(runtimeEnv, "ADMIN_EMAILS"));
-  if (!allowlist.has(tokenEmail)) return null;
+  if (!allowlist.has(tokenEmail)) return { user: null, reason: "email-not-allowed" };
 
   return {
-    userId: payload.sub || tokenEmail,
-    email: tokenEmail,
-    displayName: tokenEmail,
+    user: {
+      userId: payload.sub || tokenEmail,
+      email: tokenEmail,
+      displayName: tokenEmail,
+    },
+    reason: "authorized",
   };
 }
 
