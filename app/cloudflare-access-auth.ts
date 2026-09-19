@@ -32,6 +32,9 @@ export async function getAdminUser(requestHeaders?: Headers): Promise<AdminUser 
   }
 
   const token = requestHeaderList.get("cf-access-jwt-assertion");
+  // Cloudflare guarantees the signed Access JWT for protected origin requests.
+  // Some deployments do not include the convenience email header, so the
+  // verified JWT email is the authoritative identity.
   const forwardedEmail = requestHeaderList
     .get("cf-access-authenticated-user-email")
     ?.trim()
@@ -39,13 +42,16 @@ export async function getAdminUser(requestHeaders?: Headers): Promise<AdminUser 
   const teamDomain = normalizeTeamDomain(runtimeEnv.CF_ACCESS_TEAM_DOMAIN);
   const audience = runtimeEnv.CF_ACCESS_AUD?.trim();
 
-  if (!token || !forwardedEmail || !teamDomain || !audience) return null;
+  if (!token || !teamDomain || !audience) return null;
 
   const payload = await verifyAccessToken(token, teamDomain, audience).catch(() => null);
   if (!payload) return null;
 
   const tokenEmail = payload.email?.trim().toLowerCase();
-  if (!tokenEmail || tokenEmail !== forwardedEmail) return null;
+  if (!tokenEmail) return null;
+  // If Cloudflare supplies the optional convenience header, reject a mismatch
+  // instead of silently accepting contradictory identity information.
+  if (forwardedEmail && tokenEmail !== forwardedEmail) return null;
 
   const allowlist = parseAdminEmails(runtimeEnv.ADMIN_EMAILS);
   if (!allowlist.has(tokenEmail)) return null;
