@@ -57,12 +57,17 @@ Configure these in Cloudflare, never in committed source:
 | `CF_ACCESS_TEAM_DOMAIN` | The Zero Trust team domain, for example `team.cloudflareaccess.com`. |
 | `CF_ACCESS_AUD` | Audience tag of the Access application protecting the admin paths. |
 
-Create Cloudflare Access self-hosted applications for both paths on the free Workers hostname:
+Create Cloudflare Access self-hosted applications for both paths on every hostname that serves the application. For the custom domain, protect:
+
+- `goldengamesnexus.com/admin*`
+- `goldengamesnexus.com/api/admin/*`
+
+If the free Workers hostname remains enabled, also protect:
 
 - `goldengames-nexus.<account-subdomain>.workers.dev/admin*`
 - `goldengames-nexus.<account-subdomain>.workers.dev/api/admin/*`
 
-Use an Allow policy containing only the owner's email. The public site, article images and published downloads must remain outside those protected paths.
+Use an Allow policy containing only the owner's email. Configure `ADMIN_EMAILS`, `CF_ACCESS_TEAM_DOMAIN` and `CF_ACCESS_AUD` on the `goldengames-nexus` Worker that serves the custom domain; variables on a separate admin-named Worker are not visible to this route. The public site, article images and published downloads must remain outside those protected paths.
 
 ## Security notes
 
