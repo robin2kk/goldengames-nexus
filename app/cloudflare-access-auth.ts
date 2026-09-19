@@ -26,8 +26,11 @@ export async function getAdminUser(requestHeaders?: Headers): Promise<AdminUser 
   const runtimeEnv = env as Cloudflare.Env;
   const requestHeaderList = requestHeaders ?? (await headers());
 
-  if (runtimeEnv.ENVIRONMENT === "development" && runtimeEnv.DEV_ADMIN_EMAIL) {
-    const email = runtimeEnv.DEV_ADMIN_EMAIL.trim().toLowerCase();
+  const environment = getTextBinding(runtimeEnv, "ENVIRONMENT");
+  const developmentEmail = getTextBinding(runtimeEnv, "DEV_ADMIN_EMAIL");
+
+  if (environment === "development" && developmentEmail) {
+    const email = developmentEmail.trim().toLowerCase();
     return { userId: `local:${email}`, email, displayName: email };
   }
 
@@ -39,8 +42,8 @@ export async function getAdminUser(requestHeaders?: Headers): Promise<AdminUser 
     .get("cf-access-authenticated-user-email")
     ?.trim()
     .toLowerCase();
-  const teamDomain = normalizeTeamDomain(runtimeEnv.CF_ACCESS_TEAM_DOMAIN);
-  const audience = runtimeEnv.CF_ACCESS_AUD?.trim();
+  const teamDomain = normalizeTeamDomain(getTextBinding(runtimeEnv, "CF_ACCESS_TEAM_DOMAIN"));
+  const audience = getTextBinding(runtimeEnv, "CF_ACCESS_AUD")?.trim();
 
   if (!token || !teamDomain || !audience) return null;
 
@@ -53,7 +56,7 @@ export async function getAdminUser(requestHeaders?: Headers): Promise<AdminUser 
   // instead of silently accepting contradictory identity information.
   if (forwardedEmail && tokenEmail !== forwardedEmail) return null;
 
-  const allowlist = parseAdminEmails(runtimeEnv.ADMIN_EMAILS);
+  const allowlist = parseAdminEmails(getTextBinding(runtimeEnv, "ADMIN_EMAILS"));
   if (!allowlist.has(tokenEmail)) return null;
 
   return {
@@ -65,12 +68,25 @@ export async function getAdminUser(requestHeaders?: Headers): Promise<AdminUser 
 
 export function isAdminConfigured(): boolean {
   const runtimeEnv = env as Cloudflare.Env;
-  if (runtimeEnv.ENVIRONMENT === "development" && runtimeEnv.DEV_ADMIN_EMAIL) return true;
+  const environment = getTextBinding(runtimeEnv, "ENVIRONMENT");
+  const developmentEmail = getTextBinding(runtimeEnv, "DEV_ADMIN_EMAIL");
+  if (environment === "development" && developmentEmail) return true;
   return Boolean(
-    runtimeEnv.CF_ACCESS_TEAM_DOMAIN &&
-      runtimeEnv.CF_ACCESS_AUD &&
-      parseAdminEmails(runtimeEnv.ADMIN_EMAILS).size,
+    getTextBinding(runtimeEnv, "CF_ACCESS_TEAM_DOMAIN") &&
+      getTextBinding(runtimeEnv, "CF_ACCESS_AUD") &&
+      parseAdminEmails(getTextBinding(runtimeEnv, "ADMIN_EMAILS")).size,
   );
+}
+
+function getTextBinding(runtimeEnv: Cloudflare.Env, name: keyof Cloudflare.Env): string | undefined {
+  const binding = runtimeEnv[name];
+  if (typeof binding === "string" && binding.trim()) return binding;
+
+  // Cloudflare's Node.js compatibility layer also exposes text variables and
+  // secrets through process.env. This fallback covers RSC builds where the
+  // dashboard binding is not present on the imported env proxy.
+  const nodeValue = process.env[name];
+  return typeof nodeValue === "string" && nodeValue.trim() ? nodeValue : undefined;
 }
 
 async function verifyAccessToken(
