@@ -25,7 +25,9 @@
     }
   ],
   "vars": {
-    "ENVIRONMENT": "production"
+    "ENVIRONMENT": "production",
+    "CF_ACCESS_TEAM_DOMAIN": "https://dry-leaf-18c2.cloudflareaccess.com",
+    "CF_ACCESS_AUD": "4136d98c8437af099ff944bc1a2f63064dd7b97d56db6aacc4deedf0e2bffbe3"
   },
   "observability": {
     "enabled": true
