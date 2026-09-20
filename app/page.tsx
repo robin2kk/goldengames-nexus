@@ -40,7 +40,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
       <nav aria-label="Primary navigation"><a href="#latest">News</a><a href="#videos">Videos</a><a href="#downloads">Downloads</a><a href="#platforms">Platforms</a><a className="community-nav" href="/community"><MessageCircle size={15}/> Community</a></nav>
       <HeaderSearch initialQuery={q}/>
     </header>
-    <section className="ticker" aria-label="Breaking updates"><Zap size={14}/><b>LIVE FEED</b><span>PS5 • PS4 • XBOX • SWITCH • RETRO</span><span className="ticker-rule"/></section>
+    <section className="ticker" aria-label="Breaking updates"><Zap size={14}/><b>LIVE FEED</b><span>PS5 • PS4 • PS3 • XBOX • SWITCH • RETRO</span><span className="ticker-rule"/></section>
     <section className="hero">
       <div className="hero-copy"><span className="eyebrow"><Sparkles size={15}/> INDEPENDENT GAMING SCENE</span><h1>Everything happening<br/>beyond the <i>start screen.</i></h1><p>Jailbreak developments, homebrew releases, trusted downloads and retro discoveries — reported clearly for players who like to explore.</p><div className="hero-actions"><a className="primary-btn" href="#latest">Explore latest <ArrowUpRight size={18}/></a><a className="text-link" href="#downloads"><Download size={17}/> Browse downloads</a></div></div>
       <div className="hero-art" aria-label="Gaming platforms"><div className="orbit orbit-one"/><div className="orbit orbit-two"/><div className="console-card main-console"><span>PS5</span><small>SCENE INTEL</small></div><div className="console-card mini-card c1">PS4</div><div className="console-card mini-card c2">XBOX</div><div className="console-card mini-card c3">SWITCH</div><div className="console-card mini-card c4">16-BIT</div></div>

@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { getAdminUser, type AdminUser } from "../../cloudflare-access-auth";
 
-export const ALLOWED_PLATFORMS = ["PS5", "PS4", "Xbox", "Switch", "Retro"];
+export const ALLOWED_PLATFORMS = ["PS5", "PS4", "PS3", "Xbox", "Switch", "Retro"];
 export const ALLOWED_KINDS = ["Scene News", "Homebrew", "Release", "Video", "Guide", "Opinion"];
 
 const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);

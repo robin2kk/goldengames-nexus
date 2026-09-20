@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, Download, Search } from "lucide-react";
 export type FeedPost = { id:number; title:string; excerpt:string; platform:string; kind:string; createdAt:string; featured:boolean|number; downloadName:string|null; imageName:string|null };
-const platforms=["All","PS5","PS4","Xbox","Switch","Retro"];
+const platforms=["All","PS5","PS4","PS3","Xbox","Switch","Retro"];
 export function HomeFeed({initialPosts,initialQuery=""}:{initialPosts:FeedPost[];initialQuery?:string}){
  const [platform,setPlatform]=useState("All"); const [query,setQuery]=useState(initialQuery);
  useEffect(()=>{const update=(event:Event)=>setQuery((event as CustomEvent<string>).detail||"");window.addEventListener("goldengames-search",update);return()=>window.removeEventListener("goldengames-search",update)},[]);
