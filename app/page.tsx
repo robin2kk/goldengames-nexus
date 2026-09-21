@@ -41,12 +41,12 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
       <HeaderSearch initialQuery={q}/>
     </header>
     <section className="ticker" aria-label="Breaking updates"><Zap size={14}/><b>LIVE FEED</b><span>PS5 • PS4 • PS3 • XBOX • SWITCH • RETRO</span><span className="ticker-rule"/></section>
-    <section className="hero">
-      <div className="hero-copy"><span className="eyebrow"><Sparkles size={15}/> INDEPENDENT GAMING SCENE</span><h1>Everything happening<br/>beyond the <i>start screen.</i></h1><p>Jailbreak developments, homebrew releases, trusted downloads and retro discoveries — reported clearly for players who like to explore.</p><div className="hero-actions"><a className="primary-btn" href="#latest">Explore latest <ArrowUpRight size={18}/></a><a className="text-link" href="#downloads"><Download size={17}/> Browse downloads</a></div></div>
+    <HomeFeed initialPosts={posts} initialQuery={q}/>
+    <AdSlot placement="home-leaderboard" />
+    <section className="hero homepage-intro" aria-labelledby="homepage-intro-title">
+      <div className="hero-copy"><span className="eyebrow"><Sparkles size={15}/> INDEPENDENT GAMING SCENE</span><h1 id="homepage-intro-title">Everything happening<br/>beyond the <i>start screen.</i></h1><p>Jailbreak developments, homebrew releases, trusted downloads and retro discoveries — reported clearly for players who like to explore.</p><div className="hero-actions"><a className="primary-btn" href="#latest">Explore latest <ArrowUpRight size={18}/></a><a className="text-link" href="#downloads"><Download size={17}/> Browse downloads</a></div></div>
       <div className="hero-art" aria-label="Gaming platforms"><div className="orbit orbit-one"/><div className="orbit orbit-two"/><div className="console-card main-console"><span>PS5</span><small>SCENE INTEL</small></div><div className="console-card mini-card c1">PS4</div><div className="console-card mini-card c2">XBOX</div><div className="console-card mini-card c3">SWITCH</div><div className="console-card mini-card c4">16-BIT</div></div>
     </section>
-    <AdSlot placement="home-leaderboard" />
-    <HomeFeed initialPosts={posts} initialQuery={q}/>
     <section className="video-section" id="videos"><div className="section-heading"><div><span className="eyebrow"><Play size={14}/> GOLDENGAMES VIDEOS</span><h2>Watch the latest coverage</h2></div></div>{videos.length?<div className="video-grid">{videos.map(v=><article key={v.id} className="video-card"><div className="video-frame"><iframe src={`https://www.youtube-nocookie.com/embed/${v.youtubeId}`} title={v.title} loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowFullScreen/></div><div><span>{v.platform}</span><h3>{v.title}</h3><p>{v.excerpt}</p><a href={`/news/${v.id}`}>Read the full story <ArrowUpRight size={16}/></a></div></article>)}</div>:<div className="video-empty"><Play size={28}/><div><b>Your videos will appear here</b><span>Add a YouTube link when publishing a new update.</span></div></div>}</section>
     <AdSlot placement="home-footer" />
     <SiteFooter />
