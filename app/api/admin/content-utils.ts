@@ -1,8 +1,8 @@
 import { env } from "cloudflare:workers";
 import { getAdminUser, type AdminUser } from "../../cloudflare-access-auth";
 
-export const ALLOWED_PLATFORMS = ["PS5", "PS4", "PS3", "Xbox", "Switch", "Retro"];
-export const ALLOWED_KINDS = ["Scene News", "Homebrew", "Release", "Video", "Guide", "Opinion"];
+export const ALLOWED_PLATFORMS = ["PS6", "PS5", "PS4", "PS3", "Xbox", "Switch", "Retro"];
+export const ALLOWED_KINDS = ["Breaking News", "Scene News", "Homebrew", "Release", "Video", "Guide", "Opinion"];
 
 const IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
 const BLOCKED_DOWNLOAD_TYPES = new Set([

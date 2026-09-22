@@ -130,8 +130,8 @@ export function Publisher({ posts }: { posts: AdminPost[] }) {
       <form key={selected?.id ?? "new"} onSubmit={submit} className="publisher-form">
         <label>Headline<input ref={titleRef} name="title" required maxLength={140} defaultValue={selected?.title} placeholder="What happened?"/></label>
         <div className="field-row">
-          <label>Platform<select name="platform" defaultValue={selected?.platform ?? "PS5"}><option>PS5</option><option>PS4</option><option>PS3</option><option>Xbox</option><option>Switch</option><option>Retro</option></select></label>
-          <label>Content type<select name="kind" defaultValue={selected?.kind ?? "Scene News"}><option>Scene News</option><option>Homebrew</option><option>Release</option><option>Video</option><option>Guide</option><option>Opinion</option></select></label>
+          <label>Platform<select name="platform" defaultValue={selected?.platform ?? "PS5"}><option>PS6</option><option>PS5</option><option>PS4</option><option>PS3</option><option>Xbox</option><option>Switch</option><option>Retro</option></select></label>
+          <label>Content type<select name="kind" defaultValue={selected?.kind ?? "Scene News"}><option>Breaking News</option><option>Scene News</option><option>Homebrew</option><option>Release</option><option>Video</option><option>Guide</option><option>Opinion</option></select></label>
         </div>
         <label>Short summary<textarea name="excerpt" required maxLength={280} rows={3} defaultValue={selected?.excerpt} placeholder="A clear summary for the homepage"/></label>
         <label>Full article<textarea name="body" required rows={12} defaultValue={selected?.body} placeholder="Write the complete update here..."/></label>

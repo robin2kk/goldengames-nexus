@@ -1,7 +1,7 @@
 import { env } from "cloudflare:workers";
 import { assertCommunityOrigin, getCommunityUser } from "../../../community-auth";
 
-const platforms = ["PS5", "PS4", "PS3", "Xbox", "Switch", "Retro", "General"];
+const platforms = ["PS6", "PS5", "PS4", "PS3", "Xbox", "Switch", "Retro", "General"];
 const kinds = ["Question", "Discussion"];
 export async function POST(request: Request) {
   const originError = assertCommunityOrigin(request);

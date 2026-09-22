@@ -62,3 +62,6 @@ footer{background:#17202b;color:#b7c3c8;border-top:4px solid transparent;border-
 
 /* PS3 platform cards */
 .visual-ps3{background:linear-gradient(145deg,#324f9f,#7389d6)}
+
+/* PS6 platform cards */
+.visual-ps6{background:radial-gradient(circle at 75% 20%,rgba(0,207,255,.52),transparent 26%),linear-gradient(145deg,#071b3b,#0e4d79)}

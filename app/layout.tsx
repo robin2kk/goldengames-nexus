@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "GoldenGames Nexus | Gaming Scene News & Homebrew",
-  description: "Jailbreak scene news, homebrew releases and trusted downloads for PS5, PS4, Xbox, Nintendo Switch and retro systems.",
+  description: "Jailbreak scene news, homebrew releases and trusted downloads for PS6, PS5, PS4, PS3, Xbox, Nintendo Switch and retro systems.",
   icons: {
     icon: "/goldengames-logo.png",
     shortcut: "/goldengames-logo.png",

@@ -40,7 +40,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ q
       <nav aria-label="Primary navigation"><a href="#latest">News</a><a href="#videos">Videos</a><a href="#downloads">Downloads</a><a href="#platforms">Platforms</a><a className="community-nav" href="/community"><MessageCircle size={15}/> Community</a></nav>
       <HeaderSearch initialQuery={q}/>
     </header>
-    <section className="ticker" aria-label="Breaking updates"><Zap size={14}/><b>LIVE FEED</b><span>PS5 • PS4 • PS3 • XBOX • SWITCH • RETRO</span><span className="ticker-rule"/></section>
+    <section className="ticker" aria-label="Breaking updates"><Zap size={14}/><b>LIVE FEED</b><span>PS6 • PS5 • PS4 • PS3 • XBOX • SWITCH • RETRO</span><span className="ticker-rule"/></section>
     <HomeFeed initialPosts={posts} initialQuery={q}/>
     <AdSlot placement="home-leaderboard" />
     <section className="hero homepage-intro" aria-labelledby="homepage-intro-title">
